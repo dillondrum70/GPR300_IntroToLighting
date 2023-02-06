@@ -104,7 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)vendor\GLFW\include;$(SolutionDir)vendor\GLEW\include;$(SolutionDir)vendor\stbi;$(SolutionDir)vendor\glm\include;$(SolutionDir)vendor\imgui;$(SolutionDir)GPR300_Lighting\Source;$(SolutionDir)GPR300_Lighting\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)vendor\GLFW\include;$(SolutionDir)vendor\GLEW\include;$(SolutionDir)vendor\stbi;$(SolutionDir)vendor\glm\include;$(SolutionDir)vendor\imgui;$(SolutionDir)GPR300_Lighting\Source;$(SolutionDir)GPR300_Lighting\imgui;$(SolutionDir)GPR300_Lighting\EW;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -142,6 +142,8 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="EW\Mesh.cpp" />
     <ClCompile Include="EW\Shader.cpp" />
+    <ClCompile Include="Source\Light.cpp" />
+    <ClCompile Include="Source\Material.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EW\Camera.h" />
@@ -159,6 +161,7 @@
     <ClInclude Include="EW\ShapeGen.h" />
     <ClInclude Include="EW\Shader.h" />
     <ClInclude Include="EW\Transform.h" />
+    <ClInclude Include="Source\Light.h" />
     <ClInclude Include="Source\Material.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

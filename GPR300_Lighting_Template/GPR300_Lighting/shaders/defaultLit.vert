@@ -15,6 +15,6 @@ uniform mat4 _NormalMatrix;
 void main(){    
     Normal = vNormal;
     WorldPos = vec3(_Model * vec4(vPos, 1));
-    WorldNormal = mat3(_NormalMatrix) * Normal;
+    WorldNormal = normalize(mat3(_NormalMatrix) * Normal);
     gl_Position = _Projection * _View * _Model * vec4(vPos,1);
 }

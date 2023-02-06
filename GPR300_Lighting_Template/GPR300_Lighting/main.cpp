@@ -176,6 +176,8 @@ int main() {
 		litShader.setFloat("_Mat.specularCoefficient", defaultMat.specularK);
 		litShader.setFloat("_Mat.shininess", defaultMat.shininess);
 
+		litShader.setVec3("_CamPos", camera.getPosition());
+
 		//Draw cube
 		glm::mat4 cubeModel = cubeTransform.getModelMatrix();
 		litShader.setMat4("_Model", cubeModel);

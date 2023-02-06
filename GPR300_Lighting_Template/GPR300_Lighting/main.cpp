@@ -22,6 +22,8 @@
 #include "EW/Transform.h"
 #include "EW/ShapeGen.h"
 
+#include "Material.h"
+
 void processInput(GLFWwindow* window);
 void resizeFrameBufferCallback(GLFWwindow* window, int width, int height);
 void keyboardCallback(GLFWwindow* window, int keycode, int scancode, int action, int mods);
@@ -138,6 +140,8 @@ int main() {
 	lightTransform.scale = glm::vec3(0.5f);
 	lightTransform.position = glm::vec3(0.0f, 5.0f, 0.0f);
 
+	Material mat;
+
 	while (!glfwWindowShouldClose(window)) {
 		processInput(window);
 		glClearColor(bgColor.r,bgColor.g,bgColor.b, 1.0f);
@@ -157,19 +161,27 @@ int main() {
 		litShader.setMat4("_View", camera.getViewMatrix());
 		litShader.setVec3("_LightPos", lightTransform.position);
 		//Draw cube
-		litShader.setMat4("_Model", cubeTransform.getModelMatrix());
+		glm::mat4 cubeModel = cubeTransform.getModelMatrix();
+		litShader.setMat4("_Model", cubeModel);
+		litShader.setMat4("_NormalMatrix", glm::transpose(glm::inverse(cubeModel)));
 		cubeMesh.draw();
 
 		//Draw sphere
-		litShader.setMat4("_Model", sphereTransform.getModelMatrix());
+		glm::mat4 sphereModel = sphereTransform.getModelMatrix();
+		litShader.setMat4("_Model", sphereModel);
+		litShader.setMat4("_NormalMatrix", glm::transpose(glm::inverse(sphereModel)));
 		sphereMesh.draw();
 
 		//Draw cylinder
-		litShader.setMat4("_Model", cylinderTransform.getModelMatrix());
+		glm::mat4 cylinderModel = cylinderTransform.getModelMatrix();
+		litShader.setMat4("_Model", cylinderModel);
+		litShader.setMat4("_NormalMatrix", glm::transpose(glm::inverse(cylinderModel)));
 		cylinderMesh.draw();
 
 		//Draw plane
-		litShader.setMat4("_Model", planeTransform.getModelMatrix());
+		glm::mat4 planeModel = planeTransform.getModelMatrix();
+		litShader.setMat4("_Model", planeModel);
+		litShader.setMat4("_NormalMatrix", glm::transpose(glm::inverse(planeModel)));
 		planeMesh.draw();
 
 		//Draw light as a small sphere using unlit shader, ironically.
@@ -181,6 +193,11 @@ int main() {
 		sphereMesh.draw();
 
 		//Draw UI
+		ImGui::SetNextWindowSize(ImVec2(0, 0));	//Size to fit content
+		ImGui::Begin("Material");
+		mat.ExposeImGui();
+		ImGui::End();
+
 		ImGui::Begin("Settings");
 
 		ImGui::ColorEdit3("Light Color", &lightColor.r);

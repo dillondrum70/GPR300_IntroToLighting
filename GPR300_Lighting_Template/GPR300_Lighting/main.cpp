@@ -57,6 +57,7 @@ glm::vec3 bgColor = glm::vec3(0);
 glm::vec3 lightColor = glm::vec3(1.0f);
 float intensity = .1f;
 glm::vec3 lightPosition = glm::vec3(0.0f, 3.0f, 0.0f);
+bool phong = true;
 
 bool wireFrame = false;
 
@@ -169,6 +170,7 @@ int main() {
 		litShader.setVec3("_Light.pos", lightTransform.position);
 		litShader.setFloat("_Light.intensity", intensity);
 		litShader.setVec3("_Light.color", lightColor);
+		litShader.setInt("_Light.phong", phong);
 
 		litShader.setVec3("_Mat.color", defaultMat.color);
 		litShader.setFloat("_Mat.ambientCoefficient", defaultMat.ambientK);
@@ -219,6 +221,7 @@ int main() {
 		ImGui::ColorEdit3("Light Color", &lightColor.r);
 		ImGui::SliderFloat("Light Intensity", &intensity, 0, 1);
 		ImGui::DragFloat3("Light Position", &lightTransform.position.x);
+		ImGui::Checkbox("Phong Lighting", &phong);
 		ImGui::End();
 
 		ImGui::Render();

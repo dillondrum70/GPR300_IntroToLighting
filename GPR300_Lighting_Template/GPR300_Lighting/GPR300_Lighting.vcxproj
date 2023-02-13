@@ -142,7 +142,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="EW\Mesh.cpp" />
     <ClCompile Include="EW\Shader.cpp" />
-    <ClCompile Include="Source\Light.cpp" />
+    <ClCompile Include="Source\PointLight.cpp" />
     <ClCompile Include="Source\Material.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -161,7 +161,7 @@
     <ClInclude Include="EW\ShapeGen.h" />
     <ClInclude Include="EW\Shader.h" />
     <ClInclude Include="EW\Transform.h" />
-    <ClInclude Include="Source\Light.h" />
+    <ClInclude Include="Source\PointLight.h" />
     <ClInclude Include="Source\Material.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

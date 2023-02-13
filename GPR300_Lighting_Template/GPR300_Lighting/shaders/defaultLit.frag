@@ -1,22 +1,27 @@
 #version 450                          
 out vec4 FragColor;
 
-in vec3 Normal;
-in vec3 WorldNormal;
-in vec3 WorldPos;
+in struct Vertex
+{
+    vec3 Normal;
+    vec3 WorldPos;
+    vec3 WorldNormal;
+}vert_out;
 
 //Uniforms from application
 
-struct LightProperties
+struct PointLight
 {
     vec3 pos;
     vec3 color;
     float intensity;
-
-    bool phong;
 };
 
-struct MaterialProperties
+const int MAX_POINT_LIGHTS = 8;
+uniform PointLight _PointLight[MAX_POINT_LIGHTS];
+uniform int _UsedPointLights;
+
+struct Material
 {
     vec3 color;
 
@@ -26,41 +31,72 @@ struct MaterialProperties
     float shininess;
 };
 
-uniform LightProperties _Light;
-uniform MaterialProperties _Mat;
+uniform Material _Mat;
 uniform vec3 _CamPos;
+uniform bool _Phong;
+
+vec3 calculateDiffuse(float coefficient, vec3 lightDir, vec3 worldNormal, vec3 intensity)
+{
+    return coefficient * clamp(dot(lightDir, worldNormal), 0, 1) * intensity;
+}
+
+float calculatePhong(vec3 worldPos, vec3 lightPos, vec3 worldNormal, vec3 eyeDir)
+{
+    return dot(normalize(reflect(worldPos - lightPos, worldNormal)), eyeDir);
+}
+
+float calculateBlinnPhong(vec3 eyeDir, vec3 lightDir, vec3 worldNormal)
+{
+    vec3 sum = eyeDir + lightDir;
+    vec3 halfVec = sum / length(sum);
+    return dot(worldNormal, halfVec);
+}
+
+vec3 calculateSpecular(float coefficient, float angle, float shininess, vec3 intensity)
+{
+    return coefficient * pow(clamp(angle, 0, 1), shininess) * intensity;
+}
+
 
 void main()
 {   
-    vec3 intensityRGB = _Light.intensity * _Light.color * _Mat.color;
-
     //Ambient Light
-    vec3 ambient = _Mat.ambientCoefficient * intensityRGB;
+    vec3 ambient = _Mat.ambientCoefficient * _Mat.color;
 
-    //Diffuse Light
-    //Direction to light
-    vec3 lightDir = normalize(_Light.pos - WorldPos);
-    vec3 diffuse = _Mat.diffuseCoefficient * clamp(dot(lightDir, WorldNormal), 0, 1) * intensityRGB;
-    
-    //Specular Light
-    //What dot product to put in for specular (depending on if phong or blinn-phong it changes)
-    float angle = 0;
+    vec3 diffuse = vec3(0);
+    vec3 specular = vec3(0);
 
-    //Direction to viewer
-    vec3 eyeDir = normalize(_CamPos - WorldPos);
-
-    if(_Light.phong)    //Phong
+    for(int i = 0; i < _UsedPointLights; i++)
     {
-        angle = dot(normalize(reflect(WorldPos - _Light.pos, WorldNormal)), eyeDir);
-    }
-    else    //Blinn-Phong
-    {
-        vec3 sum = eyeDir + lightDir;
-        vec3 halfVec = sum / length(sum);
-        angle = dot(WorldNormal, halfVec);
-    }
+        //Material color and light intensity/color
+        vec3 intensityRGB = _PointLight[i].intensity * _PointLight[i].color * _Mat.color;
+
+        //Direction to light
+        vec3 lightDir = normalize(_PointLight[i].pos - vert_out.WorldPos);
+
+        //Diffuse Light
+        diffuse += calculateDiffuse(_Mat.diffuseCoefficient, lightDir, vert_out.WorldNormal, intensityRGB);
     
-    vec3 specular = _Mat.specularCoefficient * pow(clamp(angle, 0, 1), _Mat.shininess) * intensityRGB;
+        //Specular Light
+        //What dot product to put in for specular (depending on if phong or blinn-phong it changes)
+        float angle = 0;
+
+        //Direction to viewer
+        vec3 eyeDir = normalize(_CamPos - vert_out.WorldPos);
+
+        if(_Phong)    //Phong
+        {
+            angle = calculatePhong(vert_out.WorldPos, _PointLight[i].pos, vert_out.WorldNormal, eyeDir);
+        }
+        else    //Blinn-Phong
+        {
+            angle = calculateBlinnPhong(eyeDir, lightDir, vert_out.WorldNormal);
+        }
+    
+        specular += calculateSpecular(_Mat.specularCoefficient, angle, _Mat.shininess, intensityRGB);
+    }
+
+    
 
     FragColor = vec4(ambient + diffuse + specular, 1.0f);
 }

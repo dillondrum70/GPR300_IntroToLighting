@@ -54,7 +54,7 @@
     <ClCompile Include="Source\Material.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Light.cpp">
+    <ClCompile Include="Source\PointLight.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -107,7 +107,7 @@
     <ClInclude Include="Source\Material.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Light.h">
+    <ClInclude Include="Source\PointLight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

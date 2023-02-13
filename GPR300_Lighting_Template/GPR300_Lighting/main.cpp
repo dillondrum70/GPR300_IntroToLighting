@@ -23,7 +23,7 @@
 #include "EW/ShapeGen.h"
 
 #include "Material.h"
-//#include "Light.h"
+#include "PointLight.h"
 
 void processInput(GLFWwindow* window);
 void resizeFrameBufferCallback(GLFWwindow* window, int width, int height);
@@ -56,7 +56,10 @@ Camera camera((float)SCREEN_WIDTH / (float)SCREEN_HEIGHT);
 glm::vec3 bgColor = glm::vec3(0);
 glm::vec3 lightColor = glm::vec3(1.0f);
 float intensity = .1f;
-glm::vec3 lightPosition = glm::vec3(0.0f, 3.0f, 0.0f);
+float lightRadius = 5.f;
+//glm::vec3 lightPosition = glm::vec3(0.0f, 3.0f, 0.0f);
+const int MAX_POINT_LIGHTS = 8;
+
 bool phong = true;
 
 bool wireFrame = false;
@@ -145,6 +148,9 @@ int main() {
 
 	Material defaultMat;
 
+	PointLight pointLights[MAX_POINT_LIGHTS];
+	int pointLightCount = 3;
+
 	//Light light;
 	//light.transform.scale = glm::vec3(0.5f);
 	//light.transform.position = glm::vec3(0.0f, 5.0f, 0.0f);
@@ -166,11 +172,19 @@ int main() {
 		litShader.use();
 		litShader.setMat4("_Projection", camera.getProjectionMatrix());
 		litShader.setMat4("_View", camera.getViewMatrix());
+
+		litShader.setInt("_UsedPointLights", pointLightCount);
 		
-		litShader.setVec3("_Light.pos", lightTransform.position);
-		litShader.setFloat("_Light.intensity", intensity);
-		litShader.setVec3("_Light.color", lightColor);
-		litShader.setInt("_Light.phong", phong);
+		for (int i = 0; i < pointLightCount; i++)
+		{
+			pointLights[i].pos.x = lightRadius * (cos(2 * glm::pi<float>() * (i / (float)pointLightCount)));
+			pointLights[i].pos.z = lightRadius * (sin(2 * glm::pi<float>() * (i / (float)pointLightCount)));
+
+			litShader.setVec3("_PointLight[" + std::to_string(i) + "].pos", pointLights[i].pos);
+			litShader.setVec3("_PointLight[" + std::to_string(i) + "].color", pointLights[i].color);
+			litShader.setFloat("_PointLight[" + std::to_string(i) + "].intensity", pointLights[i].intensity);
+		}
+
 
 		litShader.setVec3("_Mat.color", defaultMat.color);
 		litShader.setFloat("_Mat.ambientCoefficient", defaultMat.ambientK);
@@ -179,6 +193,8 @@ int main() {
 		litShader.setFloat("_Mat.shininess", defaultMat.shininess);
 
 		litShader.setVec3("_CamPos", camera.getPosition());
+
+		litShader.setInt("_Phong", phong);
 
 		//Draw cube
 		glm::mat4 cubeModel = cubeTransform.getModelMatrix();
@@ -208,20 +224,38 @@ int main() {
 		unlitShader.use();
 		unlitShader.setMat4("_Projection", camera.getProjectionMatrix());
 		unlitShader.setMat4("_View", camera.getViewMatrix());
-		unlitShader.setMat4("_Model", lightTransform.getModelMatrix());
-		unlitShader.setVec3("_Color", lightColor);
-		sphereMesh.draw();
+		for (size_t i = 0; i < pointLightCount; i++)
+		{
+			unlitShader.setMat4("_Model", glm::translate(glm::mat4(1), pointLights[i].pos));
+			unlitShader.setVec3("_Color", pointLights[i].color);
+			sphereMesh.draw();
+		}
 
-		//Draw UI
+		//Material
 		defaultMat.ExposeImGui();
-		//light.ExposeImGui();
 
+		//General Settings
+		ImGui::SetNextWindowSize(ImVec2(0, 0));	//Size to fit content
 		ImGui::Begin("Settings");
-
-		ImGui::ColorEdit3("Light Color", &lightColor.r);
-		ImGui::SliderFloat("Light Intensity", &intensity, 0, 1);
-		ImGui::DragFloat3("Light Position", &lightTransform.position.x);
 		ImGui::Checkbox("Phong Lighting", &phong);
+		ImGui::End();
+
+		//Point Lights
+		ImGui::SetNextWindowSize(ImVec2(0, 0));	//Size to fit content
+		ImGui::Begin("Point Lights");
+
+		ImGui::SliderInt("Light Count", &pointLightCount, 0, MAX_POINT_LIGHTS);
+		ImGui::SliderFloat("Light Radius", &lightRadius, 0, 100);
+		
+		for (size_t i = 0; i < pointLightCount; i++)
+		{
+			ImGui::Text(("Point Light" + std::to_string(i)).c_str());
+
+			ImGui::PushID(i);
+			pointLights[i].ExposeImGui();
+			ImGui::PopID();
+		}
+
 		ImGui::End();
 
 		ImGui::Render();

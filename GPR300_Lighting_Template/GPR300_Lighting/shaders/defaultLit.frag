@@ -59,9 +59,9 @@ vec3 calculateDiffuse(float coefficient, vec3 lightDir, vec3 worldNormal, vec3 i
     return coefficient * clamp(dot(lightDir, worldNormal), 0, 1) * intensity;
 }
 
-float calculatePhong(vec3 worldPos, vec3 lightPos, vec3 worldNormal, vec3 eyeDir)
+float calculatePhong(vec3 eyeDir, vec3 lightDir, vec3 worldNormal)
 {
-    return dot(normalize(reflect(worldPos - lightPos, worldNormal)), eyeDir);
+    return dot(normalize(reflect(lightDir, worldNormal)), eyeDir);
 }
 
 float calculateBlinnPhong(vec3 eyeDir, vec3 lightDir, vec3 worldNormal)
@@ -100,7 +100,7 @@ void pointLights(inout vec3 diffuse, inout vec3 specular)
 
         if(_Phong)    //Phong
         {
-            angle = calculatePhong(vert_out.WorldPos, _PointLight[i].pos, vert_out.WorldNormal, eyeDir);
+            angle = calculatePhong(eyeDir, -lightDir, vert_out.WorldNormal);
         }
         else    //Blinn-Phong
         {
@@ -126,7 +126,7 @@ void directionalLight(inout vec3 diffuse, inout vec3 specular)
 
     if(_Phong)    //Phong
     {
-        angle = calculatePhong(vert_out.WorldPos, lightDir, vert_out.WorldNormal, eyeDir);
+        angle = calculatePhong(eyeDir, -lightDir, vert_out.WorldNormal);
     }
     else    //Blinn-Phong
     {         

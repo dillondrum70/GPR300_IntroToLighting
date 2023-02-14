@@ -8,7 +8,7 @@
 struct Material
 {
 	glm::vec3 color = glm::vec3(1);
-	float ambientK = .5f;
+	float ambientK = .15f;
 	float diffuseK = .5f;
 	float specularK = .25f;
 	float shininess = 2;

@@ -11,7 +11,7 @@ struct PointLight
 
 	glm::vec3 pos = glm::vec3(0, 5, 0);
 
-	void ExposeImGui();
+	void ExposeImGui(bool canMove);
 };
 
 #endif

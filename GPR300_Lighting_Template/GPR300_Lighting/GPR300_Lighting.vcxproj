@@ -142,6 +142,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="EW\Mesh.cpp" />
     <ClCompile Include="EW\Shader.cpp" />
+    <ClCompile Include="Source\DirectionalLight.cpp" />
     <ClCompile Include="Source\PointLight.cpp" />
     <ClCompile Include="Source\Material.cpp" />
   </ItemGroup>
@@ -161,6 +162,7 @@
     <ClInclude Include="EW\ShapeGen.h" />
     <ClInclude Include="EW\Shader.h" />
     <ClInclude Include="EW\Transform.h" />
+    <ClInclude Include="Source\DirectionalLight.h" />
     <ClInclude Include="Source\PointLight.h" />
     <ClInclude Include="Source\Material.h" />
   </ItemGroup>

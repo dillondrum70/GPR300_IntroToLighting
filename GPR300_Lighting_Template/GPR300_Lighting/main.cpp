@@ -24,6 +24,7 @@
 
 #include "Material.h"
 #include "PointLight.h"
+#include "DirectionalLight.h"
 
 void processInput(GLFWwindow* window);
 void resizeFrameBufferCallback(GLFWwindow* window, int width, int height);
@@ -53,12 +54,25 @@ const float CAMERA_ZOOM_SPEED = 3.0f;
 
 Camera camera((float)SCREEN_WIDTH / (float)SCREEN_HEIGHT);
 
+Material defaultMat;
+
 glm::vec3 bgColor = glm::vec3(0);
-glm::vec3 lightColor = glm::vec3(1.0f);
-float intensity = .1f;
+
 float lightRadius = 5.f;
-//glm::vec3 lightPosition = glm::vec3(0.0f, 3.0f, 0.0f);
+float lightHeight = 5.f;
+
 const int MAX_POINT_LIGHTS = 8;
+PointLight pointLights[MAX_POINT_LIGHTS];
+int pointLightCount = 0;
+
+DirectionalLight directionalLight;
+bool directionalEnabled = true;
+
+float constantAttenuation = 1.f;
+float linearAttenuation = .35f;
+float quadraticAttenuation = .44f;
+
+bool manuallyMoveLights = false;	//If true, allows you to move point lights manually
 
 bool phong = true;
 
@@ -146,11 +160,6 @@ int main() {
 	lightTransform.scale = glm::vec3(0.5f);
 	lightTransform.position = glm::vec3(0.0f, 5.0f, 0.0f);
 
-	Material defaultMat;
-
-	PointLight pointLights[MAX_POINT_LIGHTS];
-	int pointLightCount = 3;
-
 	//Light light;
 	//light.transform.scale = glm::vec3(0.5f);
 	//light.transform.position = glm::vec3(0.0f, 5.0f, 0.0f);
@@ -173,19 +182,36 @@ int main() {
 		litShader.setMat4("_Projection", camera.getProjectionMatrix());
 		litShader.setMat4("_View", camera.getViewMatrix());
 
+		//Attenuation Uniforms
+		litShader.setFloat("_Attenuation.constant", constantAttenuation);
+		litShader.setFloat("_Attenuation.linear", linearAttenuation);
+		litShader.setFloat("_Attenuation.quadratic", quadraticAttenuation);
+
+		//Point Light Uniforms
 		litShader.setInt("_UsedPointLights", pointLightCount);
 		
 		for (int i = 0; i < pointLightCount; i++)
 		{
-			pointLights[i].pos.x = lightRadius * (cos(2 * glm::pi<float>() * (i / (float)pointLightCount)));
-			pointLights[i].pos.z = lightRadius * (sin(2 * glm::pi<float>() * (i / (float)pointLightCount)));
+			if (!manuallyMoveLights)
+			{
+				pointLights[i].pos.x = lightRadius * (cos(2 * glm::pi<float>() * (i / (float)pointLightCount)));
+				pointLights[i].pos.y = lightHeight;
+				pointLights[i].pos.z = lightRadius * (sin(2 * glm::pi<float>() * (i / (float)pointLightCount)));
+			}
 
 			litShader.setVec3("_PointLight[" + std::to_string(i) + "].pos", pointLights[i].pos);
 			litShader.setVec3("_PointLight[" + std::to_string(i) + "].color", pointLights[i].color);
 			litShader.setFloat("_PointLight[" + std::to_string(i) + "].intensity", pointLights[i].intensity);
 		}
 
+		//Directional Light Uniforms
+		litShader.setInt("_DirectionalEnabled", directionalEnabled);
 
+		litShader.setVec3("_DirectionalLight.dir", directionalLight.dir);
+		litShader.setVec3("_DirectionalLight.color", directionalLight.color);
+		litShader.setFloat("_DirectionalLight.intensity", directionalLight.intensity);
+
+		//Material Uniforms
 		litShader.setVec3("_Mat.color", defaultMat.color);
 		litShader.setFloat("_Mat.ambientCoefficient", defaultMat.ambientK);
 		litShader.setFloat("_Mat.diffuseCoefficient", defaultMat.diffuseK);
@@ -238,6 +264,7 @@ int main() {
 		ImGui::SetNextWindowSize(ImVec2(0, 0));	//Size to fit content
 		ImGui::Begin("Settings");
 		ImGui::Checkbox("Phong Lighting", &phong);
+		ImGui::Checkbox("Manually Move Lights", &manuallyMoveLights);
 		ImGui::End();
 
 		//Point Lights
@@ -245,16 +272,26 @@ int main() {
 		ImGui::Begin("Point Lights");
 
 		ImGui::SliderInt("Light Count", &pointLightCount, 0, MAX_POINT_LIGHTS);
-		ImGui::SliderFloat("Light Radius", &lightRadius, 0, 100);
+		ImGui::SliderFloat("Light Radius", &lightRadius, 0.f, 100.f);
+		ImGui::SliderFloat("Light Height", &lightHeight, -5.f, 30.f);
 		
 		for (size_t i = 0; i < pointLightCount; i++)
 		{
 			ImGui::Text(("Point Light" + std::to_string(i)).c_str());
 
 			ImGui::PushID(i);
-			pointLights[i].ExposeImGui();
+			pointLights[i].ExposeImGui(manuallyMoveLights);
 			ImGui::PopID();
 		}
+
+		ImGui::End();
+
+		//Directional Light
+		ImGui::SetNextWindowSize(ImVec2(0, 0));	//Size to fit content
+		ImGui::Begin("Directional Light");
+
+		ImGui::Checkbox("Enabled", &directionalEnabled);
+		directionalLight.ExposeImGui();
 
 		ImGui::End();
 

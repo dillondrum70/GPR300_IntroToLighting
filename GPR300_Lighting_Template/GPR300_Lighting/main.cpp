@@ -25,6 +25,7 @@
 #include "Material.h"
 #include "PointLight.h"
 #include "DirectionalLight.h"
+#include "SpotLight.h"
 
 void processInput(GLFWwindow* window);
 void resizeFrameBufferCallback(GLFWwindow* window, int width, int height);
@@ -66,7 +67,10 @@ PointLight pointLights[MAX_POINT_LIGHTS];
 int pointLightCount = 0;
 
 DirectionalLight directionalLight;
-bool directionalEnabled = true;
+bool directionalEnabled = false;
+
+SpotLight spotlight;
+bool spotlightEnabled = true;
 
 float constantAttenuation = 1.f;
 float linearAttenuation = .35f;
@@ -211,6 +215,18 @@ int main() {
 		litShader.setVec3("_DirectionalLight.color", directionalLight.color);
 		litShader.setFloat("_DirectionalLight.intensity", directionalLight.intensity);
 
+		//Spotlight Uniforms
+		litShader.setInt("_SpotlightEnabled", spotlightEnabled);
+
+		litShader.setVec3("_Spotlight.pos", spotlight.pos);
+		litShader.setVec3("_Spotlight.dir", spotlight.dir);
+		litShader.setVec3("_Spotlight.color", spotlight.color);
+		litShader.setFloat("_Spotlight.intensity", spotlight.intensity);
+		litShader.setFloat("_Spotlight.range", spotlight.range);
+		litShader.setFloat("_Spotlight.minAngle", glm::cos(glm::radians(spotlight.innerAngle)));
+		litShader.setFloat("_Spotlight.maxAngle", glm::cos(glm::radians(spotlight.outerAngle)));
+		litShader.setFloat("_Spotlight.falloff", spotlight.angleFalloff);
+
 		//Material Uniforms
 		litShader.setVec3("_Mat.color", defaultMat.color);
 		litShader.setFloat("_Mat.ambientCoefficient", defaultMat.ambientK);
@@ -263,18 +279,20 @@ int main() {
 		//General Settings
 		ImGui::SetNextWindowSize(ImVec2(0, 0));	//Size to fit content
 		ImGui::Begin("Settings");
+
 		ImGui::Checkbox("Phong Lighting", &phong);
-		ImGui::Checkbox("Manually Move Lights", &manuallyMoveLights);
+		ImGui::Checkbox("Manually Move Point Lights", &manuallyMoveLights);
+
 		ImGui::End();
 
 		//Point Lights
-		ImGui::SetNextWindowSize(ImVec2(0, 0));	//Size to fit content
+		ImGui::SetNextWindowSize(ImVec2(0, 0), ImGuiCond_FirstUseEver);	//Size to fit content
 		ImGui::Begin("Point Lights");
 
 		ImGui::SliderInt("Light Count", &pointLightCount, 0, MAX_POINT_LIGHTS);
 		ImGui::SliderFloat("Light Radius", &lightRadius, 0.f, 100.f);
 		ImGui::SliderFloat("Light Height", &lightHeight, -5.f, 30.f);
-		
+
 		for (size_t i = 0; i < pointLightCount; i++)
 		{
 			ImGui::Text(("Point Light" + std::to_string(i)).c_str());
@@ -287,11 +305,20 @@ int main() {
 		ImGui::End();
 
 		//Directional Light
-		ImGui::SetNextWindowSize(ImVec2(0, 0));	//Size to fit content
+		ImGui::SetNextWindowSize(ImVec2(0, 0), ImGuiCond_FirstUseEver);	//Size to fit content
 		ImGui::Begin("Directional Light");
 
 		ImGui::Checkbox("Enabled", &directionalEnabled);
 		directionalLight.ExposeImGui();
+
+		ImGui::End();
+
+		//Spotlight
+		ImGui::SetNextWindowSize(ImVec2(0, 0), ImGuiCond_FirstUseEver);	//Size to fit content
+		ImGui::Begin("Spotlight");
+
+		ImGui::Checkbox("Enabled", &spotlightEnabled);
+		spotlight.ExposeImGui();
 
 		ImGui::End();
 

@@ -1,5 +1,3 @@
-﻿  DirectionalLight.cpp
-  main.cpp
-C:\Users\ddrummond\Documents\GPR300\IntroToLighting\GPR300_Lighting_Template\GPR300_Lighting\main.cpp(282,19): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-  Generating Code...
+﻿  main.cpp
+C:\Users\ddrummond\Documents\GPR300\IntroToLighting\GPR300_Lighting_Template\GPR300_Lighting\main.cpp(300,19): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
   GPR300_Lighting.vcxproj -> C:\Users\ddrummond\Documents\GPR300\IntroToLighting\GPR300_Lighting_Template\x64\Debug\GPR300_Lighting.exe

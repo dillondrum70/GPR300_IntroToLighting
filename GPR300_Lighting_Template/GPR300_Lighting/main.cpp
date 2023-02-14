@@ -283,6 +283,10 @@ int main() {
 		ImGui::Checkbox("Phong Lighting", &phong);
 		ImGui::Checkbox("Manually Move Point Lights", &manuallyMoveLights);
 
+		ImGui::Text("GL Falloff Attenuation");
+		ImGui::SliderFloat("Linear", &linearAttenuation, .0014f, 1.f);
+		ImGui::SliderFloat("Quadratic", &quadraticAttenuation, .000007f, 2.0f);
+
 		ImGui::End();
 
 		//Point Lights

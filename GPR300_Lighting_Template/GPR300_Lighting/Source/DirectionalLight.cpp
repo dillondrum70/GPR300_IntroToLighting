@@ -2,9 +2,12 @@
 
 #include "imgui.h"
 
-void DirectionalLight::ExposeImGui()
+void DirectionalLight::ExposeImGui(bool manuallyMove)
 {
-	ImGui::DragFloat3("Light Direction", &dir.x);
+	if (manuallyMove)
+	{
+		ImGui::DragFloat3("Light Direction", &dir.x);
+	}
 
 	ImGui::SliderFloat("Light Intensity", &intensity, 0.f, 1.f);
 

@@ -59,18 +59,25 @@ Material defaultMat;
 
 glm::vec3 bgColor = glm::vec3(0);
 
-float lightRadius = 5.f;
-float lightHeight = 5.f;
+float lightScale = .5f;
 
 const int MAX_POINT_LIGHTS = 8;
 PointLight pointLights[MAX_POINT_LIGHTS];
 int pointLightCount = 0;
+float pointLightRadius = 5.f;
+float pointLightHeight = 5.f;
 
-DirectionalLight directionalLight;
-bool directionalEnabled = false;
+const int MAX_DIRECTIONAL_LIGHTS = 8;
+DirectionalLight directionalLights[MAX_DIRECTIONAL_LIGHTS];
+int directionalLightCount = 0;
+float directionalLightAngle = 180.f;	//Angle towards center, 0 is down, + is towards the center, - is away from the center
 
-SpotLight spotlight;
-bool spotlightEnabled = true;
+const int MAX_SPOTLIGHTS = 8;
+SpotLight spotlights[MAX_SPOTLIGHTS];
+int spotlightCount = 0;
+float spotlightRadius = 5.f;
+float spotlightHeight = 5.f;
+float spotlightAngle = 0.f;	//Angle towards center, 0 is down, + is towards the center, - is away from the center
 
 float constantAttenuation = 1.f;
 float linearAttenuation = .35f;
@@ -161,12 +168,33 @@ int main() {
 
 	cylinderTransform.position = glm::vec3(2.0f, 0.0f, 0.0f);
 
-	lightTransform.scale = glm::vec3(0.5f);
-	lightTransform.position = glm::vec3(0.0f, 5.0f, 0.0f);
+	pointLights[0].color = glm::vec3(1, 1, 1);
+	pointLights[1].color = glm::vec3(0, 1, 1);
+	pointLights[2].color = glm::vec3(0, 0, 1);
+	pointLights[3].color = glm::vec3(1, 0, 1);
+	pointLights[4].color = glm::vec3(1, 0, 0);
+	pointLights[5].color = glm::vec3(1, .5, 0);
+	pointLights[6].color = glm::vec3(1, 1, 0);
+	pointLights[7].color = glm::vec3(0, 1, 0);
 
-	//Light light;
-	//light.transform.scale = glm::vec3(0.5f);
-	//light.transform.position = glm::vec3(0.0f, 5.0f, 0.0f);
+	spotlights[0].color = glm::vec3(1, 1, 1);
+	spotlights[1].color = glm::vec3(0, 1, 1);
+	spotlights[2].color = glm::vec3(0, 0, 1);
+	spotlights[3].color = glm::vec3(1, 0, 1);
+	spotlights[4].color = glm::vec3(1, 0, 0);
+	spotlights[5].color = glm::vec3(1, .5, 0);
+	spotlights[6].color = glm::vec3(1, 1, 0);
+	spotlights[7].color = glm::vec3(0, 1, 0);
+
+	directionalLights[0].color = glm::vec3(1, 1, 1);
+	directionalLights[1].color = glm::vec3(0, 1, 1);
+	directionalLights[2].color = glm::vec3(0, 0, 1);
+	directionalLights[3].color = glm::vec3(1, 0, 1);
+	directionalLights[4].color = glm::vec3(1, 0, 0);
+	directionalLights[5].color = glm::vec3(1, .5, 0);
+	directionalLights[6].color = glm::vec3(1, 1, 0);
+	directionalLights[7].color = glm::vec3(0, 1, 0);
+	
 
 	while (!glfwWindowShouldClose(window)) {
 		processInput(window);
@@ -198,9 +226,9 @@ int main() {
 		{
 			if (!manuallyMoveLights)
 			{
-				pointLights[i].pos.x = lightRadius * (cos(2 * glm::pi<float>() * (i / (float)pointLightCount)));
-				pointLights[i].pos.y = lightHeight;
-				pointLights[i].pos.z = lightRadius * (sin(2 * glm::pi<float>() * (i / (float)pointLightCount)));
+				pointLights[i].pos.x = pointLightRadius * (cos(2 * glm::pi<float>() * (i / (float)pointLightCount)));
+				pointLights[i].pos.y = pointLightHeight;
+				pointLights[i].pos.z = pointLightRadius * (sin(2 * glm::pi<float>() * (i / (float)pointLightCount)));
 			}
 
 			litShader.setVec3("_PointLight[" + std::to_string(i) + "].pos", pointLights[i].pos);
@@ -209,23 +237,55 @@ int main() {
 		}
 
 		//Directional Light Uniforms
-		litShader.setInt("_DirectionalEnabled", directionalEnabled);
+		litShader.setInt("_UsedDirectionalLights", directionalLightCount);
 
-		litShader.setVec3("_DirectionalLight.dir", directionalLight.dir);
-		litShader.setVec3("_DirectionalLight.color", directionalLight.color);
-		litShader.setFloat("_DirectionalLight.intensity", directionalLight.intensity);
+		for (int i = 0; i < directionalLightCount; i++)
+		{
+			if (!manuallyMoveLights)
+			{
+				float angle = glm::sin(glm::radians(-directionalLightAngle));
+
+				directionalLights[i].dir = glm::vec3(
+					//Defines the direction this axis is rotated towards			Defines what angle to rotate by
+					(cos(2 * glm::pi<float>() * (i / (float)directionalLightCount))) * angle,
+					1,
+					(sin(2 * glm::pi<float>() * (i / (float)directionalLightCount))) * angle
+				);
+			}
+
+			litShader.setVec3("_DirectionalLight[" + std::to_string(i) + "].dir", directionalLights[i].dir);
+			litShader.setVec3("_DirectionalLight[" + std::to_string(i) + "].color", directionalLights[i].color);
+			litShader.setFloat("_DirectionalLight[" + std::to_string(i) + "].intensity", directionalLights[i].intensity);
+		}
 
 		//Spotlight Uniforms
-		litShader.setInt("_SpotlightEnabled", spotlightEnabled);
+		litShader.setInt("_UsedSpotlights", spotlightCount);
 
-		litShader.setVec3("_Spotlight.pos", spotlight.pos);
-		litShader.setVec3("_Spotlight.dir", spotlight.dir);
-		litShader.setVec3("_Spotlight.color", spotlight.color);
-		litShader.setFloat("_Spotlight.intensity", spotlight.intensity);
-		litShader.setFloat("_Spotlight.range", spotlight.range);
-		litShader.setFloat("_Spotlight.minAngle", glm::cos(glm::radians(spotlight.innerAngle)));
-		litShader.setFloat("_Spotlight.maxAngle", glm::cos(glm::radians(spotlight.outerAngle)));
-		litShader.setFloat("_Spotlight.falloff", spotlight.angleFalloff);
+		for (int i = 0; i < spotlightCount; i++)
+		{
+			if (!manuallyMoveLights)
+			{
+				spotlights[i].pos.x = spotlightRadius * (cos(2 * glm::pi<float>() * (i / (float)spotlightCount)));
+				spotlights[i].pos.y = spotlightHeight;
+				spotlights[i].pos.z = spotlightRadius * (sin(2 * glm::pi<float>() * (i / (float)spotlightCount)));
+				
+				spotlights[i].dir = glm::vec3(
+					//Defines the direction this axis is rotated towards			Defines what angle to rotate by
+					(cos(2 * glm::pi<float>() * (i / (float)spotlightCount))) * glm::sin(glm::radians(-spotlightAngle)),
+					-1,
+					(sin(2 * glm::pi<float>() * (i / (float)spotlightCount))) * glm::sin(glm::radians(-spotlightAngle))
+				);
+			}
+
+			litShader.setVec3("_Spotlight[" + std::to_string(i) + "].pos", spotlights[i].pos);
+			litShader.setVec3("_Spotlight[" + std::to_string(i) + "].dir", spotlights[i].dir);
+			litShader.setVec3("_Spotlight[" + std::to_string(i) + "].color", spotlights[i].color);
+			litShader.setFloat("_Spotlight[" + std::to_string(i) + "].intensity", spotlights[i].intensity);
+			litShader.setFloat("_Spotlight[" + std::to_string(i) + "].range", spotlights[i].range);
+			litShader.setFloat("_Spotlight[" + std::to_string(i) + "].minAngle", glm::cos(glm::radians(spotlights[i].innerAngle)));
+			litShader.setFloat("_Spotlight[" + std::to_string(i) + "].maxAngle", glm::cos(glm::radians(spotlights[i].outerAngle)));
+			litShader.setFloat("_Spotlight[" + std::to_string(i) + "].falloff", spotlights[i].angleFalloff);
+		}
 
 		//Material Uniforms
 		litShader.setVec3("_Mat.color", defaultMat.color);
@@ -268,9 +328,18 @@ int main() {
 		unlitShader.setMat4("_View", camera.getViewMatrix());
 		for (size_t i = 0; i < pointLightCount; i++)
 		{
-			unlitShader.setMat4("_Model", glm::translate(glm::mat4(1), pointLights[i].pos));
+			unlitShader.setMat4("_Model", glm::translate(glm::mat4(1), pointLights[i].pos) * glm::scale(glm::mat4(1), glm::vec3(lightScale)));
 			unlitShader.setVec3("_Color", pointLights[i].color);
 			sphereMesh.draw();
+		}
+
+		for (size_t i = 0; i < spotlightCount; i++)
+		{
+			glm::mat4 rotation = ew::rotateX(-asin(spotlights[i].dir.z)) * ew::rotateY(acos(spotlights[i].dir.y)) * ew::rotateZ(-asin(spotlights[i].dir.x));
+
+			unlitShader.setMat4("_Model", glm::translate(glm::mat4(1), spotlights[i].pos)* rotation * glm::scale(glm::mat4(1), glm::vec3(lightScale)));
+			unlitShader.setVec3("_Color", spotlights[i].color);
+			cylinderMesh.draw();
 		}
 
 		//Material
@@ -281,7 +350,8 @@ int main() {
 		ImGui::Begin("Settings");
 
 		ImGui::Checkbox("Phong Lighting", &phong);
-		ImGui::Checkbox("Manually Move Point Lights", &manuallyMoveLights);
+		ImGui::Checkbox("Manually Move Lights", &manuallyMoveLights);
+		ImGui::Text("Opens option under settings\nin different types of lights\nto change the individual\nposition and/or direction of\nthe lights");
 
 		ImGui::Text("GL Falloff Attenuation");
 		ImGui::SliderFloat("Linear", &linearAttenuation, .0014f, 1.f);
@@ -294,8 +364,12 @@ int main() {
 		ImGui::Begin("Point Lights");
 
 		ImGui::SliderInt("Light Count", &pointLightCount, 0, MAX_POINT_LIGHTS);
-		ImGui::SliderFloat("Light Radius", &lightRadius, 0.f, 100.f);
-		ImGui::SliderFloat("Light Height", &lightHeight, -5.f, 30.f);
+
+		if (!manuallyMoveLights)
+		{
+			ImGui::SliderFloat("Light Array Radius", &pointLightRadius, 0.f, 100.f);
+			ImGui::SliderFloat("Light Array Height", &pointLightHeight, -5.f, 30.f);
+		}
 
 		for (size_t i = 0; i < pointLightCount; i++)
 		{
@@ -312,8 +386,21 @@ int main() {
 		ImGui::SetNextWindowSize(ImVec2(0, 0), ImGuiCond_FirstUseEver);	//Size to fit content
 		ImGui::Begin("Directional Light");
 
-		ImGui::Checkbox("Enabled", &directionalEnabled);
-		directionalLight.ExposeImGui();
+		ImGui::SliderInt("Light Count", &directionalLightCount, 0, MAX_DIRECTIONAL_LIGHTS);
+
+		if (!manuallyMoveLights)
+		{
+			ImGui::SliderFloat("Light Array Angle", &directionalLightAngle, 90.f, 270.f);
+		}
+		
+		for (size_t i = 0; i < directionalLightCount; i++)
+		{
+			ImGui::Text(("Directional Light " + std::to_string(i)).c_str());
+
+			ImGui::PushID(i);
+			directionalLights[i].ExposeImGui(manuallyMoveLights);
+			ImGui::PopID();
+		}
 
 		ImGui::End();
 
@@ -321,8 +408,23 @@ int main() {
 		ImGui::SetNextWindowSize(ImVec2(0, 0), ImGuiCond_FirstUseEver);	//Size to fit content
 		ImGui::Begin("Spotlight");
 
-		ImGui::Checkbox("Enabled", &spotlightEnabled);
-		spotlight.ExposeImGui();
+		ImGui::SliderInt("Light Count", &spotlightCount, 0, MAX_SPOTLIGHTS);
+
+		if (!manuallyMoveLights)
+		{
+			ImGui::SliderFloat("Light Array Radius", &spotlightRadius, 0.f, 100.f);
+			ImGui::SliderFloat("Light Array Height", &spotlightHeight, -5.f, 30.f);
+			ImGui::SliderFloat("Light Array Angle", &spotlightAngle, -60.f, 60.f);
+		}
+
+		for (size_t i = 0; i < spotlightCount; i++)
+		{
+			ImGui::Text(("Spotlight " + std::to_string(i)).c_str());
+
+			ImGui::PushID(i);
+			spotlights[i].ExposeImGui(manuallyMoveLights);
+			ImGui::PopID();
+		}
 
 		ImGui::End();
 

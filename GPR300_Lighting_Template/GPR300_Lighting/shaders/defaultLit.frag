@@ -37,8 +37,9 @@ struct DirectionalLight
     float intensity;
 };
 
-uniform DirectionalLight _DirectionalLight;
-uniform bool _DirectionalEnabled;
+const int MAX_DIRECTIONAL_LIGHTS = 8;
+uniform DirectionalLight _DirectionalLight[MAX_DIRECTIONAL_LIGHTS];
+uniform int _UsedDirectionalLights;
 
 struct Spotlight
 {
@@ -53,8 +54,9 @@ struct Spotlight
     float falloff;
 };
 
-uniform Spotlight _Spotlight;
-uniform bool _SpotlightEnabled;
+const int MAX_SPOTLIGHTS = 8;
+uniform Spotlight _Spotlight[MAX_SPOTLIGHTS];
+uniform int _UsedSpotlights;
 
 struct Material
 {
@@ -130,58 +132,64 @@ void pointLights(inout vec3 diffuse, inout vec3 specular)
 
 void directionalLight(inout vec3 diffuse, inout vec3 specular)
 {
-    vec3 intensityRGB = _DirectionalLight.intensity * _DirectionalLight.color * _Mat.color;   //Material color and light intensity/color
-    vec3 lightDir = normalize(_DirectionalLight.dir);
-    
-    //Diffuse Light
-    diffuse += calculateDiffuse(_Mat.diffuseCoefficient, lightDir, vert_out.WorldNormal, intensityRGB);
-    
-    //Specular Light
-    float angle = 0;    //What dot product to put in for specular (depending on if phong or blinn-phong it changes)
-    vec3 eyeDir = normalize(_CamPos - vert_out.WorldPos);   //Direction to viewer
-
-    if(_Phong)    //Phong
+    for(int i = 0; i < _UsedDirectionalLights; i++)
     {
-        angle = calculatePhong(eyeDir, -lightDir, vert_out.WorldNormal);
-    }
-    else    //Blinn-Phong
-    {         
-        angle = calculateBlinnPhong(eyeDir, lightDir, vert_out.WorldNormal);
-    }
+        vec3 intensityRGB = _DirectionalLight[i].intensity * _DirectionalLight[i].color * _Mat.color;   //Material color and light intensity/color
+        vec3 lightDir = normalize(_DirectionalLight[i].dir);
     
-    specular += calculateSpecular(_Mat.specularCoefficient, angle, _Mat.shininess, intensityRGB);
+        //Diffuse Light
+        diffuse += calculateDiffuse(_Mat.diffuseCoefficient, lightDir, vert_out.WorldNormal, intensityRGB);
+    
+        //Specular Light
+        float angle = 0;    //What dot product to put in for specular (depending on if phong or blinn-phong it changes)
+        vec3 eyeDir = normalize(_CamPos - vert_out.WorldPos);   //Direction to viewer
+
+        if(_Phong)    //Phong
+        {
+            angle = calculatePhong(eyeDir, -lightDir, vert_out.WorldNormal);
+        }
+        else    //Blinn-Phong
+        {         
+            angle = calculateBlinnPhong(eyeDir, lightDir, vert_out.WorldNormal);
+        }
+    
+        specular += calculateSpecular(_Mat.specularCoefficient, angle, _Mat.shininess, intensityRGB);
+    }
 }
 
 void calculateSpotlight(inout vec3 diffuse, inout vec3 specular)
 {
-    vec3 intensityRGB = _Spotlight.intensity * _Spotlight.color * _Mat.color;   //Material color and light intensity/color
-    float dist = distance(vert_out.WorldPos, _Spotlight.pos);    //distance between candidate point and light
-    vec3 lightDir = normalize(_Spotlight.pos - vert_out.WorldPos);  //Direction to light
-    float attenuationFactor = calculateAttenuationFactor(dist, _Attenuation.constant, _Attenuation.linear, _Attenuation.quadratic);   //Factor of how much light makes it based on distance
-
-    vec3 fragDir = normalize(vert_out.WorldPos - _Spotlight.pos);
-    float fragAngle = dot(_Spotlight.dir, fragDir);
-    float angularAttentuation = pow(max(min(((fragAngle - _Spotlight.maxAngle) / (_Spotlight.minAngle - _Spotlight.maxAngle)), 1), 0), _Spotlight.falloff) * _Spotlight.range;
-
-    //Diffuse Light
-    diffuse += calculateDiffuse(_Mat.diffuseCoefficient, lightDir, vert_out.WorldNormal, intensityRGB)
-    * attenuationFactor * angularAttentuation; 
-
-    //Specular Light
-    float angle = 0;    //What dot product to put in for specular (depending on if phong or blinn-phong it changes)
-    vec3 eyeDir = normalize(_CamPos - vert_out.WorldPos);   //Direction to viewer
-
-    if(_Phong)    //Phong
+    for(int i = 0; i < _UsedSpotlights; i++)
     {
-        angle = calculatePhong(eyeDir, -lightDir, vert_out.WorldNormal);
-    }
-    else    //Blinn-Phong
-    {
-        angle = calculateBlinnPhong(eyeDir, lightDir, vert_out.WorldNormal);
-    }
+        vec3 intensityRGB = _Spotlight[i].intensity * _Spotlight[i].color * _Mat.color;   //Material color and light intensity/color
+        float dist = distance(vert_out.WorldPos, _Spotlight[i].pos);    //distance between candidate point and light
+        vec3 lightDir = normalize(_Spotlight[i].pos - vert_out.WorldPos);  //Direction to light
+        float attenuationFactor = calculateAttenuationFactor(dist, _Attenuation.constant, _Attenuation.linear, _Attenuation.quadratic);   //Factor of how much light makes it based on distance
+
+        vec3 fragDir = normalize(vert_out.WorldPos - _Spotlight[i].pos);
+        float fragAngle = dot(normalize(_Spotlight[i].dir), fragDir);
+        float angularAttentuation = pow(max(min(((fragAngle - _Spotlight[i].maxAngle) / (_Spotlight[i].minAngle - _Spotlight[i].maxAngle)), 1), 0), _Spotlight[i].falloff) * _Spotlight[i].range;
+
+        //Diffuse Light
+        diffuse += calculateDiffuse(_Mat.diffuseCoefficient, lightDir, vert_out.WorldNormal, intensityRGB)
+        * attenuationFactor * angularAttentuation; 
+
+        //Specular Light
+        float angle = 0;    //What dot product to put in for specular (depending on if phong or blinn-phong it changes)
+        vec3 eyeDir = normalize(_CamPos - vert_out.WorldPos);   //Direction to viewer
+
+        if(_Phong)    //Phong
+        {
+            angle = calculatePhong(eyeDir, -lightDir, vert_out.WorldNormal);
+        }
+        else    //Blinn-Phong
+        {
+            angle = calculateBlinnPhong(eyeDir, lightDir, vert_out.WorldNormal);
+        }
     
-    specular += calculateSpecular(_Mat.specularCoefficient, angle, _Mat.shininess, intensityRGB)
-    * attenuationFactor * angularAttentuation;
+        specular += calculateSpecular(_Mat.specularCoefficient, angle, _Mat.shininess, intensityRGB)
+        * attenuationFactor * angularAttentuation;
+    }
 }
 
 void main()
@@ -196,16 +204,10 @@ void main()
     pointLights(diffuse, specular);
 
     //Directional light diffuse and specular
-    if(_DirectionalEnabled)
-    {
-        directionalLight(diffuse, specular);
-    }
+    directionalLight(diffuse, specular);
 
     //Spotlight diffuse and specular
-    if(_SpotlightEnabled)
-    {
-        calculateSpotlight(diffuse, specular);
-    }
+    calculateSpotlight(diffuse, specular);
 
 
     FragColor = vec4(ambient + diffuse + specular, 1.0f);

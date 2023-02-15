@@ -2,10 +2,13 @@
 
 #include "imgui.h"
 
-void SpotLight::ExposeImGui()
+void SpotLight::ExposeImGui(bool manuallyMove)
 {
-	ImGui::DragFloat3("Spotlight Position", &pos.x);
-	ImGui::DragFloat3("Spotlight Direction", &dir.x);
+	if (manuallyMove)
+	{
+		ImGui::DragFloat3("Spotlight Position", &pos.x);
+		ImGui::DragFloat3("Spotlight Direction", &dir.x);
+	}
 
 	ImGui::SliderFloat("Spotlight Intensity", &intensity, 0.f, 1.f);
 	ImGui::ColorEdit3("Spotlight Color", &color.x);

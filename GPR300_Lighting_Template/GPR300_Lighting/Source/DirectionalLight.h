@@ -11,7 +11,7 @@ struct DirectionalLight
 
 	glm::vec3 dir = glm::vec3(10, 10, 10);
 
-	void ExposeImGui();
+	void ExposeImGui(bool manuallyMove);
 };
 
 #endif

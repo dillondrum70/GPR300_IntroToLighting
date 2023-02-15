@@ -16,7 +16,7 @@ struct SpotLight
 	float outerAngle = 30;
 	float angleFalloff = 2;
 
-	void ExposeImGui();
+	void ExposeImGui(bool manuallyMove);
 };
 
 #endif

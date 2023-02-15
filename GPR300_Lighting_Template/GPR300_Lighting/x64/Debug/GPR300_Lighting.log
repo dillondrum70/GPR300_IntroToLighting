@@ -1,3 +1,5 @@
 ﻿  main.cpp
-C:\Users\ddrummond\Documents\GPR300\IntroToLighting\GPR300_Lighting_Template\GPR300_Lighting\main.cpp(304,19): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-  GPR300_Lighting.vcxproj -> C:\Users\ddrummond\Documents\GPR300\IntroToLighting\GPR300_Lighting_Template\x64\Debug\GPR300_Lighting.exe
+C:\Users\dillo\OneDrive\Documents\Champlain\GPR300_IntermmediateGraphics\IntroToLighting\GPR300_Lighting_Template\GPR300_Lighting\main.cpp(378,19): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\dillo\OneDrive\Documents\Champlain\GPR300_IntermmediateGraphics\IntroToLighting\GPR300_Lighting_Template\GPR300_Lighting\main.cpp(400,19): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\dillo\OneDrive\Documents\Champlain\GPR300_IntermmediateGraphics\IntroToLighting\GPR300_Lighting_Template\GPR300_Lighting\main.cpp(424,19): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+  GPR300_Lighting.vcxproj -> C:\Users\dillo\OneDrive\Documents\Champlain\GPR300_IntermmediateGraphics\IntroToLighting\GPR300_Lighting_Template\x64\Debug\GPR300_Lighting.exe

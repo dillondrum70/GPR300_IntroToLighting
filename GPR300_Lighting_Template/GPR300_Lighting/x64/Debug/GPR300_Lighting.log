@@ -1,5 +1,24 @@
-﻿  main.cpp
-C:\Users\dillo\OneDrive\Documents\Champlain\GPR300_IntermmediateGraphics\IntroToLighting\GPR300_Lighting_Template\GPR300_Lighting\main.cpp(378,19): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\dillo\OneDrive\Documents\Champlain\GPR300_IntermmediateGraphics\IntroToLighting\GPR300_Lighting_Template\GPR300_Lighting\main.cpp(400,19): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\dillo\OneDrive\Documents\Champlain\GPR300_IntermmediateGraphics\IntroToLighting\GPR300_Lighting_Template\GPR300_Lighting\main.cpp(424,19): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-  GPR300_Lighting.vcxproj -> C:\Users\dillo\OneDrive\Documents\Champlain\GPR300_IntermmediateGraphics\IntroToLighting\GPR300_Lighting_Template\x64\Debug\GPR300_Lighting.exe
+﻿  Camera.cpp
+  ShapeGen.cpp
+  imgui.cpp
+  imgui_demo.cpp
+  imgui_draw.cpp
+  imgui_impl_glfw.cpp
+  imgui_impl_opengl3.cpp
+  imgui_tables.cpp
+  imgui_widgets.cpp
+  main.cpp
+C:\Users\ddrummond\Documents\GPR300\IntroToLighting\GPR300_Lighting_Template\GPR300_Lighting\main.cpp(378,19): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\ddrummond\Documents\GPR300\IntroToLighting\GPR300_Lighting_Template\GPR300_Lighting\main.cpp(400,19): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\ddrummond\Documents\GPR300\IntroToLighting\GPR300_Lighting_Template\GPR300_Lighting\main.cpp(424,19): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+  Mesh.cpp
+  Shader.cpp
+  DirectionalLight.cpp
+  PointLight.cpp
+  Material.cpp
+  SpotLight.cpp
+  Generating Code...
+glew32s.lib(glew.obj) : warning LNK4099: PDB 'vc120.pdb' was not found with 'glew32s.lib(glew.obj)' or at 'C:\Users\ddrummond\Documents\GPR300\IntroToLighting\GPR300_Lighting_Template\x64\Debug\vc120.pdb'; linking object as if no debug info
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
+LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
+  GPR300_Lighting.vcxproj -> C:\Users\ddrummond\Documents\GPR300\IntroToLighting\GPR300_Lighting_Template\x64\Debug\GPR300_Lighting.exe
